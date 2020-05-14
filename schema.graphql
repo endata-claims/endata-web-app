@@ -1,0 +1,4340 @@
+enum AccessRole {
+  UNDEFINED
+  Administrator
+  Insurance
+  Estimator
+  Adjustor
+  Builder
+  ContentSupplier
+  LossAdjuster
+  InternalAB
+  Restorer
+  Specialist
+  SystemAdmin
+}
+
+type Account {
+  id: ID!
+  callStatusConfigs: [CallStatusConfig!]!
+  clientActionsConfig: ClientActionsConfig!
+  companyConfigs: CompanyConfigs
+  consentConfigs: ConsentConfigs
+  rooms(where: RoomWhereInput): [Room!]!
+}
+
+input AccountCreateDataInput {
+  messageConfigs: MessageConfigsInput
+  actionConfigs: ActionConfigsInput
+}
+
+type AccountCreatePayload {
+  token: String
+  account: Account
+}
+
+input AccountUniqueWhereInput {
+  accountId: ID!
+}
+
+input AccountUpdateDataInput {
+  messageConfigs: MessageConfigsInput
+  actionConfigs: ActionConfigsInput
+  companyConfigs: CompanyConfigInput
+  consentConfigs: ConsentConfigInput
+}
+
+type Action {
+  actionType: ActionType
+
+  """The Global Id of the Action"""
+  id: ID!
+  isDisabled: Boolean!
+  isDisplay: Boolean!
+  name: String!
+}
+
+input ActionConfigsInput {
+  takingPicture: Boolean
+  toggleVideo: Boolean
+  toggleAudio: Boolean
+  toggleRecording: Boolean
+  hangup: Boolean
+}
+
+type ActionControl {
+  isDisabled: Boolean!
+  isDisplay: Boolean!
+  label: String!
+  name: String!
+}
+
+enum ActionType {
+  UNDEFINED
+  FEE_ADD
+  FEE_EDIT
+  FEE_DELETE
+  INVOICE_UPLOAD
+  INVOICE_BULK_UPLOAD
+  INVOICE_UPDATE_STATUS
+  INVOICE_DELETE
+  INVOICE_VIEW_DOCUMENT
+  RESERVE_UPDATE
+  COMMUNICATION_SEND
+  COMMUNICATION_ACKNOWLEDGE
+  CLAIM_ADD
+  CLAIM_ADD_PORTFOLIO
+  CLAIM_AWAITING_INFO
+  CLAIM_STATUS_VOLUME
+  CLAIM_FINALISE
+  CLAIM_CASH_SETTLE
+  CLAIMJOB_ALLOCATE_SUPPLIER
+  CLAIMJOB_REALLOCATE_SUPPLIER
+  ADJUSTER_INITIAL_CALL
+  ADJUSTER_APPOINTMENT
+  SPECIALIST_REQUEST_ADD
+  SPECIALIST_REQUEST_EDIT
+  SPECIALIST_REQUEST_DELETE
+  FILTER_INTERNAL_ASSESSOR
+  FILTER_RECOMMENDATION_STATUS
+}
+
+input AddPortfolioInput {
+  scopingSupplierId: ID = null
+  portfolioType: PortfolioType!
+}
+
+type Address {
+  line1: String
+  line2: String
+  postcode: String
+  state: State
+  suburb: String
+}
+
+input AddressInput {
+  line1: String = null
+  line2: String = null
+  suburb: String = null
+  postcode: String = null
+  state: State = null
+}
+
+type AggregateFeeCategory {
+  buildingReserve: Decimal
+  contentsReserve: Decimal
+  outstandingPayments: Decimal
+  toBeInvoiced: Decimal
+  totalAmountInvoiced: Decimal
+  totalClaimReserve: Decimal
+}
+
+type AggregateFeeItem {
+  totalAuthorisedAmount: Decimal
+}
+
+input AppointmentInput {
+  appointmentDate: DateString!
+  note: String = null
+}
+
+type AuthenticatedUser {
+  actions: AuthenticatedUserAction!
+  claimFilters: [FilterInput]
+  claimJob(
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimJobView
+  communicationFilters: [FilterInput]
+  dashboardFilters: [FilterInput]
+
+  """The Global Id of the AuthenticatedUser"""
+  id: ID!
+  name: String!
+  userRole: AccessRole!
+  userType: UserType!
+  waterfallFilters(where: ClaimStatusVolumeWhere!): [ClaimStatusVolumeGroup!]
+}
+
+type AuthenticatedUserAction {
+  createNewClaim: ActionControl!
+  createVideoSession: ActionControl!
+}
+
+input AwaitingInfoClaimInputType {
+  note: String = null
+  awaitingInfoReasonId: Byte!
+}
+
+scalar Byte
+
+type CallSession {
+  id: ID!
+  userType: CallSessionUserType
+  callStatus: CallStatusConfig!
+  room: Room!
+  contact: CallSessionContact
+}
+
+type CallSessionContact {
+  id: ID!
+  email: String
+  phone: String
+}
+
+input CallSessionStatusUpdateDataInput {
+  accountId: ID
+  status: CallSessionUpdateStatusEnum
+}
+
+input CallSessionStatusUpdateWhereInput {
+  callSessionId: ID
+}
+
+input CallSessionSubscriptionWhereInput {
+  roomId: ID
+  callSessionId: ID
+}
+
+enum CallSessionUpdateStatusEnum {
+  CHECK_REQUIREMENTS
+  CHECK_REQUIREMENTS_FAILED
+  SIGNALLING_FAILED
+}
+
+enum CallSessionUserType {
+  OWNER
+  GUEST
+}
+
+input CallSessionWhereInput {
+  callSessionId: ID
+}
+
+type CallStatusConfig {
+  id: ID!
+  status: CallStatusEnum!
+  message: String!
+}
+
+enum CallStatusEnum {
+  INIT_SESSION
+  CHECK_REQUIREMENTS
+  CHECK_REQUIREMENTS_FAILED
+  SIGNALLING
+  SIGNALLING_FAILED
+  CONNECTED
+  ENDED
+}
+
+type Card {
+  id: ID!
+  title: String
+  order: Int
+  grid: Grid
+  fields: [Field!]
+}
+
+type Case {
+  id: ID!
+  referenceNumber: String!
+  name: String
+  address: String
+}
+
+input CaseReportFilter {
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  insurers: [ID!] = null
+  managers: [ID!] = null
+  managerTeams: [String] = null
+  catCodes: [ID!] = null
+  eventTypes: [ID!] = null
+  internalAssessors: [ID!] = null
+  buildingSuppliers: [ID!] = null
+  contentsSuppliers: [ID!] = null
+  restorationSuppliers: [ID!] = null
+  buildingStatus: [ID!] = null
+  contentsStatus: [ID!] = null
+  restorationStatus: [ID!] = null
+  suppliers: [ID!] = null
+  status: [ID!] = null
+  regions: [String] = null
+  dateRange: DateRangeOption = null
+  portfolios: [PortfolioType] = null
+  states: [State] = null
+  recommendationStatus: [JobRecommendationStatus!] = null
+}
+
+input CaseReportIndex {
+  internalFilterName: String!
+  filter: CaseReportFilter = null
+}
+
+type CATCode {
+  cATCodeId: Int!
+  cATCodeName: String!
+  cATNumber: String!
+}
+
+type ClaimAdditionalData {
+  """The Id of the ClaimAdditionalData"""
+  additionalDataId: Int!
+  content: String!
+
+  """The Global Id of the ClaimAdditionalData"""
+  id: ID!
+  title: String!
+}
+
+type ClaimAdditionalDataCategory {
+  categoryName: String!
+
+  """The Global Id of the ClaimAdditionalDataCategory"""
+  id: ID!
+  items: [ClaimAdditionalData]
+}
+
+input ClaimCashSettleInput {
+  claimId: ID!
+  settlementValue: Decimal!
+  paymentTypeId: Int!
+  paymentMethodId: Int!
+  bankName: String = null
+  bsb: String = null
+  account: String = null
+  comments: String = null
+  claimPortfolioType: PortfolioType!
+  settlementDate: DateTimeString!
+}
+
+enum ClaimCategory {
+  NonUrgent
+  Urgent
+  SemiUrgent
+}
+
+type ClaimCommunication {
+  acknowledged: Boolean!
+  acknowledgeDate: DateString
+  acknowledgeUserId: Int
+  acknowledgeUserName: String
+  claimId: ID
+  claimRef: String!
+
+  """The Global Id of the ClaimCommunication"""
+  communicationClaimId: ID!
+
+  """The Id of the ClaimCommunication"""
+  communicationId: Int!
+
+  """The Global Id of the ClaimCommunication"""
+  id: ID!
+  message: String
+  portfolioType: PortfolioType
+  private: Boolean!
+  recieverCompanyId: Int
+  recieverCompanyName: String
+  sendDate: DateTimeString!
+  senderCompanyId: Int
+  senderCompanyName: String
+  senderId: Int
+  senderName: String
+  senderRole: AccessRole
+}
+
+enum ClaimCommunicationBox {
+  UnDefined
+  OutBox
+  Inbox
+  InboxAndSharedBox
+}
+
+"""
+A connection from an object to a list of objects of type `ClaimCommunication`.
+"""
+type ClaimCommunicationConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimCommunicationEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimCommunication]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input ClaimCommunicationCreate {
+  claimId: ID!
+  message: String!
+  receiverCompanyId: Int!
+  private: Boolean!
+  receiverRole: AccessRole!
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimCommunication`.
+"""
+type ClaimCommunicationEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimCommunication
+}
+
+type ClaimCommunicationPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimCommunication
+  success: Boolean!
+}
+
+type ClaimDocument {
+  amountInvoice: Float
+  company: Company
+  description: String!
+  documentFileName: String!
+
+  """The Id of the ClaimDocument"""
+  documentId: Int!
+
+  """The Global Id of the ClaimDocument"""
+  id: ID!
+  invoiceNumber: String
+  isInvoice: Boolean!
+  portfolioType: PortfolioType
+  private: Boolean!
+  uploadDate: DateTimeString
+  url: String!
+}
+
+"""
+A connection from an object to a list of objects of type `ClaimDocument`.
+"""
+type ClaimDocumentConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimDocumentEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimDocument]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input ClaimDocumentCreate {
+  claimId: ID!
+  description: String!
+  documentFileName: String!
+  fileBase64: String!
+  fileId: String = null
+  isInvoice: Boolean!
+  invoiceNumber: String = null
+  amountInvoice: Float = null
+  private: Boolean!
+  visibleByInsurer: Boolean = null
+  portfolioType: PortfolioType = null
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimDocument`.
+"""
+type ClaimDocumentEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimDocument
+}
+
+type ClaimDocumentPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimDocument
+  success: Boolean!
+}
+
+type ClaimFinaliseReason {
+  """The Id of the ClaimFinaliseReason"""
+  finaliseResonId: Int!
+
+  """The Global Id of the ClaimFinaliseReason"""
+  id: ID!
+  name: String!
+}
+
+input ClaimItemFilter {
+  id: Int = null
+  claimId: ID!
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  keyWords: String = null
+  portfolios: [PortfolioType] = null
+}
+
+type ClaimJob {
+  actions: [Action]!
+  additionalData: [ClaimAdditionalDataCategory]
+  additionalRefNumber: String
+  associatedRiskJobId: Int
+  brc: ClaimManager
+  building: ClaimPortfolio
+  caseManager: ClaimManager
+  claimDescription: String
+
+  """The Id of the ClaimJob"""
+  claimId: Int!
+  contents: ClaimPortfolio
+  contentsRefNum: String
+  customLoginEmail: String
+  externalLossAdjuster: Company
+  feeTab: FeeTab!
+  hasBuilding: Boolean!
+  hasContents: Boolean!
+  hasRestoration: Boolean!
+  hATypeVisit: HATypeVisit
+  homeAssessor: InternalAssesor
+
+  """The Global Id of the ClaimJob"""
+  id: ID!
+  incidentDetail: IncidentDetail
+  insured: ContactDetail
+  insurer: Company
+  lodgeDate: DateString
+  lossAdjustProgress: ClaimProgress
+  lotNumber: String!
+  managedByENData: Boolean!
+  mapRef: String!
+  multipleRisks: Boolean
+  planNumber: String!
+  policyCover: PolicyCover
+  policyType: PolicyType
+  refNumber: String!
+  reportFormId: ID
+  requireCustomLogin: Boolean
+  restoration: ClaimPortfolio
+  riskname: String
+  specialistRequests: [SpecialistRequest]
+  tenantDetails: Contact
+  reportForm: Form
+  reportData: Report
+}
+
+type ClaimJobAction {
+  addClaimPortfolio: ActionControl!
+  addCommunication: ActionControl!
+  addDocument: ActionControl!
+  addFeeItem: ActionControl!
+  addJobNote: ActionControl!
+  allocateSupplier: PortfolioAction!
+  auditVariation: PortfolioAction!
+  authoriseQuote: PortfolioAction!
+  awaitingInfo: ActionControl!
+  cashSettle: ActionControl!
+  claimFinalise: ActionControl!
+  createSpecialistRequest: ActionControl!
+  createVideoSession: ActionControl!
+  deleteFeeItem: ActionControl!
+  deleteInvoice: ActionControl!
+  editFeeItem: ActionControl!
+  makeLossAdjusterAppointment: ActionControl!
+  makeLossAdjusterInitialCall: ActionControl!
+  reallocateSupplier: PortfolioAction!
+  removeSpecialistRequest: ActionControl!
+  requestQuote: PortfolioAction!
+  resetMakesafe: ActionControl!
+  resetQuote: PortfolioAction!
+  scopeReview: PortfolioAction!
+  submitScope: PortfolioAction!
+  updateClaim: ActionControl!
+  updateClaimReference: ActionControl!
+  updateInvoiceStatus: ActionControl!
+  updateReserve: ActionControl!
+  updateSiteReport: PortfolioAction!
+  updateSpecialistRequest: ActionControl!
+  uploadCombinedInvoice: ActionControl!
+  uploadInvoice: ActionControl!
+  viewInvoiceDocument: ActionControl!
+}
+
+"""A connection from an object to a list of objects of type `ClaimJob`."""
+type ClaimJobConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimJobEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimJob]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input ClaimJobCreate {
+  refNumber: String!
+  contentsRefNum: String = null
+  claimDescription: String!
+  insurerId: ID!
+  mapRef: String = null
+  lotNumber: String = null
+  planNumber: String = null
+  casemanagerId: ID!
+  brcId: ID = null
+  homeAssessorId: ID = null
+  visitTypeID: ID = null
+  externalLossAdjusterId: ID = null
+  multipleRisks: Boolean = null
+  riskname: String = null
+  additionalRefNumber: String = null
+  associatedRiskJobId: Int = null
+  requireCustomLogin: Boolean = null
+  customLoginEmail: String = null
+  policyCoverId: ID = null
+  policyTypeId: ID = null
+  incidentDetail: IncidentDetailNewType!
+  insured: ContactDetailInput!
+  tenantDetails: ContactInput = null
+  portfolios: [ClaimPortfolioCreate] = null
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimJob`.
+"""
+type ClaimJobEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimJob
+}
+
+type ClaimJobField {
+  catCode: FieldInput!
+  eventType: FieldInput!
+  internalAssessor: FieldInput!
+  policyCover: FieldInput!
+  policyType: FieldInput!
+}
+
+input ClaimJobFilter {
+  id: ID = null
+  parentId: ID = null
+  subject: String = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  incidentDate: DateString = null
+  incidentDateFrom: DateString = null
+  incidentDateTo: DateString = null
+  keyWords: String = null
+  refNumber: String = null
+  postcode: String = null
+  managerTeams: [String] = null
+  managers: [ID!] = null
+  insurers: [ID!] = null
+  adjusters: [ID!] = null
+  catCodes: [ID!] = null
+  eventTypes: [ID!] = null
+  buildingSuppliers: [ID!] = null
+  contentsSuppliers: [ID!] = null
+  restorationSuppliers: [ID!] = null
+  buildingStatus: [ID!] = null
+  contentsStatus: [ID!] = null
+  restorationStatus: [ID!] = null
+  suppliers: [ID!] = null
+  status: [ID!] = null
+  internalAssessors: [ID!] = null
+  jobStatuses: [ID!] = null
+  claimStatusStageIds: [ID!] = null
+  portfolios: [PortfolioType] = null
+  states: [State] = null
+  variationStatuses: [JobVariationStatus] = null
+  requestStatuses: [QuoteRequestStatus] = null
+  recommendationStatus: [JobRecommendationStatus!] = null
+  or: ClaimJobFilter = null
+  and: ClaimJobFilter = null
+  not: ClaimJobFilter = null
+}
+
+type ClaimJobGeneral {
+  caseManagerName: String!
+  caseManagerTeam: String!
+  claimId: ID
+  daysAtStatus: Float
+
+  """The Global Id of the node"""
+  id: ID!
+
+  """The Id of the node"""
+  idenrifier: String!
+  insuredName: String!
+  insurerName: String!
+  logDate: DateString!
+  portfolioType: PortfolioType!
+  refNumber: String!
+  riskRegion: String
+  riskState: State
+  status: ClaimStatus
+  supplierName: String
+}
+
+"""
+A connection from an object to a list of objects of type `ClaimJobGeneralReport`.
+"""
+type ClaimJobGeneralReportConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimJobGeneralReportEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimJobGeneral]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimJobGeneralReport`.
+"""
+type ClaimJobGeneralReportEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimJobGeneral
+}
+
+input ClaimJobInput {
+  refNumber: String = null
+  contentsRefNum: String = null
+  additionalRefNumber: String = null
+  claimDescription: String = null
+  policyCoverId: ID = null
+  policyTypeId: ID = null
+  mapRef: String = null
+  lotNumber: String = null
+  planNumber: String = null
+  eventTypeId: ID = null
+  catCodeId: ID = null
+  incidentDate: DateString = null
+  habitableProperty: Boolean = null
+  asbestos: Boolean = null
+  hold: Boolean = null
+  makeSafeRequired: Boolean = null
+  casemanagerId: ID = null
+  brcId: ID = null
+  homeAssessorId: ID = null
+  visitTypeId: ID = null
+  externalLossAdjusterId: ID = null
+  managedByENData: Boolean = null
+  riskname: String = null
+  multipleRisks: Boolean = null
+  associatedRiskJobId: Int = null
+  requireCustomLogin: Boolean = null
+  customLoginEmail: String = null
+  insuredSalutation: PersonName = null
+  insuredName: PersonName = null
+  insuredPhone1: Phone = null
+  insuredPhone2: Phone = null
+  insuredPhone3: Phone = null
+  insuredFax: Phone = null
+  insuredEmail: Email = null
+  postalAddressLine1: String = null
+  postalAddressLine2: String = null
+  postalAddressSuburb: String = null
+  postalAddressState: State = null
+  postalAddressPostcode: String = null
+  riskAddressLine1: String = null
+  riskAddressLine2: String = null
+  riskAddressSuburb: String = null
+  riskAddressState: State = null
+  riskAddressPostcode: String = null
+  tenantName: PersonName = null
+  tenantPhone1: Phone = null
+  tenantPhone2: Phone = null
+  tenantPhone3: Phone = null
+  category: ClaimCategory = null
+  portfolios: [ClaimPortfolioInput] = null
+}
+
+type ClaimJobPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimJob
+  success: Boolean!
+}
+
+type ClaimJobStatusInfo {
+  datePopup: Boolean!
+  description: String!
+  nextStep: String!
+  noteMessage: String!
+  portfolioType: PortfolioType
+  statusId: Int!
+  statusName: String!
+}
+
+type ClaimJobView {
+  actions: ClaimJobAction!
+  additionalData: [ClaimAdditionalDataCategory]
+  additionalRefNumber: String
+  associatedRiskJobId: Int
+  brc: ClaimManager
+  building: ClaimPortfolio
+  caseManager: ClaimManager
+  claimDescription: String
+  contents: ClaimPortfolio
+  contentsRefNum: String
+  customLoginEmail: String
+  externalLossAdjuster: Company
+  feeTab: FeeTab!
+  fields: ClaimJobField!
+  hasBuilding: Boolean!
+  hasContents: Boolean!
+  hasRestoration: Boolean!
+  hATypeVisit: HATypeVisit
+  homeAssessor: InternalAssesor
+
+  """The Global Id of the ClaimJobView"""
+  id: ID!
+  incidentDetail: IncidentDetail
+  insured: ContactDetail
+  insurer: Company
+  lodgeDate: DateString
+  lossAdjustProgress: ClaimProgress
+  lotNumber: String!
+  managedByENData: Boolean!
+  mapRef: String!
+  multipleRisks: Boolean
+  planNumber: String!
+  policyCover: PolicyCover
+  policyType: PolicyType
+  refNumber: String!
+  reportFormId: ID
+  requireCustomLogin: Boolean
+  restoration: ClaimPortfolio
+  riskname: String
+  specialistRequests: [SpecialistRequest]
+  tenantDetails: Contact
+}
+
+type ClaimLossAdjusterDocument {
+  company: Company
+  description: String!
+  documentFileName: String!
+
+  """The Id of the ClaimLossAdjusterDocument"""
+  documentId: Int!
+
+  """The Global Id of the ClaimLossAdjusterDocument"""
+  id: ID!
+  private: Boolean!
+  reportType: LossAdjusterReportType
+  uploadDate: DateTimeString
+  url: String!
+}
+
+"""
+A connection from an object to a list of objects of type `ClaimLossAdjusterDocument`.
+"""
+type ClaimLossAdjusterDocumentConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimLossAdjusterDocumentEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimLossAdjusterDocument]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input ClaimLossAdjusterDocumentCreate {
+  claimId: ID!
+  description: String!
+  documentFileName: String!
+  fileBase64: String!
+  fileId: String = null
+  private: Boolean!
+  reportTypeId: Byte = null
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimLossAdjusterDocument`.
+"""
+type ClaimLossAdjusterDocumentEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimLossAdjusterDocument
+}
+
+type ClaimLossAdjusterDocumentPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimLossAdjusterDocument
+  success: Boolean!
+}
+
+type ClaimManager {
+  """The Global Id of the ClaimManager"""
+  id: ID!
+
+  """The Id of the ClaimManager"""
+  managerId: Int!
+  managerName: String!
+  managerTeam: String
+}
+
+type ClaimNote {
+  """The Global Id of the ClaimNote"""
+  id: ID!
+
+  """The Id of the ClaimNote"""
+  jobNoteId: Int!
+  logDate: DateTimeString
+  message: String!
+  portfolioType: PortfolioType
+  private: Byte
+  user: User
+  userId: Int!
+}
+
+"""A connection from an object to a list of objects of type `ClaimNote`."""
+type ClaimNoteConnection {
+  """Information to aid in pagination."""
+  edges: [ClaimNoteEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [ClaimNote]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input ClaimNoteCreate {
+  claimId: ID!
+  message: String!
+  visibleByInsurer: Boolean = null
+  private: Byte = null
+  portfolioType: PortfolioType = null
+}
+
+"""
+An edge in a connection from an object to another object of type `ClaimNote`.
+"""
+type ClaimNoteEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: ClaimNote
+}
+
+type ClaimNotePayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimNote
+  success: Boolean!
+}
+
+input ClaimParticipantIndex {
+  claimId: ID!
+  postcode: String = null
+  portfolioTypes: [PortfolioType] = null
+  participantStatus: SupplierStatusFilter = null
+  participantType: SupplierTypeFilter = null
+}
+
+type ClaimPortfolio {
+  authorised: Boolean!
+  authorisedSupplier: Company
+  authorisedValue: Decimal
+  claimCompleted: Boolean!
+  claimRecommendation: ClaimRecommendation
+  claimStatus: ClaimStatus
+  dateAccecpted: Date
+  dateCompleted: Date
+  daysAtStatus: Float
+  daysTakenToComplete: Float
+  description: String!
+  emergencyMakeSafeWorks: Int
+  estimator: Estimator
+  excessValue: Int
+  finaliseReason: ClaimFinaliseReason
+  insuranceCompletedSiteReport: Boolean!
+  isReallocateSupplier: Boolean!
+  jobSuppliers: [JobSupplier]
+  lastContactInsured: DateTimeString
+  lastStatusDate: DateTimeString
+  makesafeCompletedDate: Date
+  makeSafeProgress: ClaimProgress
+  makeSafeStatus: ClaimStatus
+  makeSafeValue: Decimal
+  nextContactInsured: DateTimeString
+  noPanelSupplier: String!
+  policyCover: PolicyCover
+  policyType: PolicyType
+  portfolioType: PortfolioType
+  progress: ClaimProgress
+  reallocate: Boolean!
+  reportDate: DateString
+  scopedValue: Decimal
+  scopePrepared: Boolean!
+  scopingSupplier: Company
+  settlementValue: Float
+  siteReport: ClaimSiteReport
+  siteReportDescription: String
+  statusBeforeAwaitingInfo: ClaimStatus
+  statusBeforeComplete: ClaimStatus
+  sumInsured: Int!
+  sumInsuredAdequate: Int
+  supervisor: Supervisor
+  supplierCollectedExcess: Int
+  supplierJobStatus: ClaimStatus
+  supplierJobValue: Decimal
+  toCollectExcess: Boolean
+  toProvideSiteReport: Boolean!
+  userContactInsured: Int
+  winningBuilderRecommend: Int
+}
+
+input ClaimPortfolioCreate {
+  portfolioType: PortfolioType!
+  toProvideSiteReport: Boolean!
+  sumInsured: Int!
+  excessValue: Int!
+  toCollectExcess: Boolean!
+  scopingSupplierId: ID!
+  quotingSupplierIds: [ID!] = null
+}
+
+input ClaimPortfolioInput {
+  portfolioType: PortfolioType!
+  policyCoverId: ID = null
+  policyTypeId: ID = null
+  description: String = null
+  sumInsured: Int = null
+  excessValue: Int = null
+  toCollectExcess: Boolean = null
+  quotingSupplierIds: [ID!] = null
+}
+
+type ClaimPortfolioPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: ClaimPortfolio
+  success: Boolean!
+}
+
+input ClaimPortfoliosWhere {
+  claimId: ID!
+  claimPortfolioTypes: [PortfolioType!] = null
+}
+
+type ClaimProgress {
+  appointmentBooked: Boolean!
+  appointmentDate: DateTimeString
+  appointmentUserId: Int
+  initialCallDate: DateTimeString
+  initialCallMade: Boolean!
+  initialCallUserId: Int
+}
+
+type ClaimRecommendation {
+  claimrecommendationid: Byte
+  description: String!
+}
+
+input ClaimReserveInput {
+  buildingReserve: Decimal!
+  contentsReserve: Decimal!
+}
+
+type ClaimSiteReport {
+  claddingType: SiteCladdingType
+  dwellingAge: SiteDwellingAge
+  dwellingType: SiteDwellingType
+  foundationType: SiteFoundationType
+  houseType: SiteHouseType
+  isAClaim: SiteIsAClaim
+  roofType: SiteRoofType
+}
+
+type ClaimStatus {
+  statusId: Int
+  statusName: String
+}
+
+type ClaimStatusVolume {
+  claimCount: Int!
+  color: String!
+
+  """The Global Id of the ClaimStatusVolume"""
+  id: ID!
+  label: String!
+}
+
+type ClaimStatusVolumeGroup {
+  claimPortfolioType: PortfolioType!
+
+  """The Global Id of the ClaimStatusVolumeGroup"""
+  id: ID!
+  items: [ClaimStatusVolume!]!
+}
+
+input ClaimStatusVolumeWhere {
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  incidentDate: DateString = null
+  incidentDateFrom: DateString = null
+  incidentDateTo: DateString = null
+  keyWords: String = null
+  managerTeams: [String] = null
+  insurers: [ID!] = null
+  managers: [ID!] = null
+  adjusters: [ID!] = null
+  catCodes: [ID!] = null
+  eventTypes: [ID!] = null
+  buildingSuppliers: [ID!] = null
+  contentsSuppliers: [ID!] = null
+  restorationSuppliers: [ID!] = null
+  internalAssessors: [ID!] = null
+  states: [State] = null
+  claimPortfolioType: PortfolioType!
+}
+
+input ClaimUniqueWhere {
+  claimId: ID!
+}
+
+type ClientActionsConfig {
+  id: ID!
+  takingPicture: Boolean!
+  toggleVideo: Boolean!
+  toggleAudio: Boolean!
+  toggleRecording: Boolean!
+  hangup: Boolean!
+}
+
+input CommunicationFilter {
+  id: ID = null
+  claimId: ID = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  keyWords: String = null
+  managers: [ID!] = null
+  managerTeams: [String] = null
+  internalAssessors: [ID!] = null
+  acknowledged: Boolean = null
+  states: [State] = null
+  boxes: [ClaimCommunicationBox] = null
+  portfolios: [PortfolioType] = null
+}
+
+type Company {
+  additionalRefNo: Boolean
+  builderAttendSite: Boolean
+  claimrecommendation: Boolean
+  cm2nd: Boolean
+  comboclaims: Boolean
+  commOptionForBuilder: Boolean
+  companyEmail: String
+  companyFax: String
+  companyId: Int!
+  companyName: String!
+  companyPhone1: String
+  companyPhone2: String
+  companyrates: Int
+  companyType: AccessRole
+  content: Int
+  contentauth: Boolean
+  contentsref: Boolean
+  createClaimFields: ClaimJobField
+  cropassess: Boolean
+  defaultratesRestoration: Int
+  defConsultBuildSiteReport: Int
+  directSupplyTemplate: Boolean
+  enableMultipleRisks: Boolean
+  hideCaseManagerFromSiteReport: Boolean
+  hideCategoryOfClaim: Boolean
+  industryrates: Int
+  insrefnumLength: Byte
+  invoiceEmail: Boolean
+  isAutoSelectSupplier: Boolean!
+  isAwaitingInformation: Boolean!
+  isFeeModule: Boolean!
+  isLossAdjuster: Boolean!
+  isMarginUpdate: Boolean!
+  isReportingModule: Boolean!
+  isSirModule: Boolean!
+  isSpecialistModule: Boolean!
+  isToProvideSiteReportView: Boolean!
+  isVideoToolModule: Boolean!
+  logoright: String
+  lossadjcomp: Int
+  lossAdjustCreateSiteReport: Int
+  makesafeAppointmentmade: Boolean
+  makesafeInitialcallmade: Boolean
+  makesafeRstAppointmentmade: Boolean
+  makesafeRstInitialcallmade: Boolean
+  makesafeRstWorkscompleted: Boolean
+  makesafeWorkscompleted: Boolean
+  mitigation: Boolean
+  nonPanelSupplier: Boolean!
+  onCostPopUp: Boolean
+  policy: Boolean
+  policyCoverManditoryField: Boolean
+  policyCoverSuppliersView: Boolean
+  policylimit: Boolean
+  policylimitperitem: Boolean
+  policyTypeManditoryField: Boolean
+  policyTypeSuppliersView: Boolean
+  quickrepair: Boolean
+  quotesperclaim: Int
+  removeHabitableAsbestos: Boolean
+  restoration: Boolean
+  rrp: Boolean
+  setupcustomerlogin: Int
+  sitereporttemplateid: Byte
+  substatus: Boolean
+  useInternalAssessor: Boolean!
+  useSirRestorationModule: Boolean!
+  usesRestrictedAcceptance: Boolean
+  waitingOptionForBuilder: Boolean
+}
+
+input CompanyConfigInput {
+  videoLogo: String
+  endLogo: String
+  smsSender: String
+}
+
+type CompanyConfigs {
+  id: ID!
+  videoLogo: String
+  endLogo: String
+  smsSender: String
+}
+
+type CompanyCustomisation {
+  applicationAlias: String
+  applicationFavicon: String
+  applicationLogo: String
+  displayCompanyLogo: String
+  logoHeight: Byte
+}
+
+type CompanyProfile {
+  additionalRefNo: Boolean
+  builderAttendSite: Boolean
+  claimrecommendation: Boolean
+  cm2nd: Boolean
+  comboclaims: Boolean
+  commOptionForBuilder: Boolean
+  companyEmail: String
+  companyFax: String
+  companyId: Int!
+  companyName: String!
+  companyPhone1: String
+  companyPhone2: String
+  companyrates: Int
+  companyType: AccessRole
+  content: Int
+  contentauth: Boolean
+  contentsref: Boolean
+  cropassess: Boolean
+  customisation: CompanyCustomisation
+  defaultratesRestoration: Int
+  defConsultBuildSiteReport: Int
+  directSupplyTemplate: Boolean
+  enableMultipleRisks: Boolean
+  hideCaseManagerFromSiteReport: Boolean
+  hideCategoryOfClaim: Boolean
+  industryrates: Int
+  insrefnumLength: Byte
+  invoiceEmail: Boolean
+  isAutoSelectSupplier: Boolean!
+  isAwaitingInformation: Boolean!
+  isFeeModule: Boolean!
+  isLossAdjuster: Boolean!
+  isMarginUpdate: Boolean!
+  isReportingModule: Boolean!
+  isSirModule: Boolean!
+  isSpecialistModule: Boolean!
+  isToProvideSiteReportView: Boolean!
+  isVideoToolModule: Boolean!
+  logoright: String
+  lossadjcomp: Int
+  lossAdjustCreateSiteReport: Int
+  makesafeAppointmentmade: Boolean
+  makesafeInitialcallmade: Boolean
+  makesafeRstAppointmentmade: Boolean
+  makesafeRstInitialcallmade: Boolean
+  makesafeRstWorkscompleted: Boolean
+  makesafeWorkscompleted: Boolean
+  mitigation: Boolean
+  nonPanelSupplier: Boolean!
+  onCostPopUp: Boolean
+  policy: Boolean
+  policyCoverManditoryField: Boolean
+  policyCoverSuppliersView: Boolean
+  policylimit: Boolean
+  policylimitperitem: Boolean
+  policyTypeManditoryField: Boolean
+  policyTypeSuppliersView: Boolean
+  quickrepair: Boolean
+  quotesperclaim: Int
+  removeHabitableAsbestos: Boolean
+  restoration: Boolean
+  rrp: Boolean
+  setupcustomerlogin: Int
+  sitereporttemplateid: Byte
+  substatus: Boolean
+  useInternalAssessor: Boolean!
+  useSirRestorationModule: Boolean!
+  usesRestrictedAcceptance: Boolean
+  waitingOptionForBuilder: Boolean
+}
+
+input ConsentConfigInput {
+  isChecking: Boolean
+  title: String
+  content: String
+}
+
+type ConsentConfigs {
+  isChecking: Boolean!
+  title: String
+  content: String
+}
+
+type Contact {
+  name: String
+  phone1: String
+  phone2: String
+  phone3: String
+}
+
+type ContactDetail {
+  email: String
+  fax: String
+  name: String
+  phone1: String
+  phone2: String
+  phone3: String
+  postalAddress: Address
+  salutation: String
+}
+
+input ContactDetailInput {
+  name: String = null
+  phone1: String = null
+  phone2: String = null
+  phone3: String = null
+  salutation: String = null
+  email: String = null
+  fax: String = null
+  postalAddress: AddressInput = null
+}
+
+input ContactInput {
+  name: String = null
+  phone1: String = null
+  phone2: String = null
+  phone3: String = null
+}
+
+type Dashboard {
+  """The Id of the Dashboard"""
+  dashboardId: Int!
+
+  """The Global Id of the Dashboard"""
+  id: ID!
+  name: String!
+}
+
+input DashboardWidgetIndex {
+  dashboardId: Int!
+  filter: CaseReportFilter = null
+}
+
+enum DataDisplay {
+  Text
+  ChartGraph
+  ChartLine
+  ChartBar
+  ChartProgressBar
+}
+
+enum DataSense {
+  Neutral
+  Commendatory
+  Derogatory
+}
+
+enum DataUnit {
+  Number
+  Currency
+}
+
+"""
+The `Date` scalar type represents a year, month and day in accordance with the
+[ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+"""
+scalar Date
+
+enum DateRangeOption {
+  UnDefined
+  Daily
+  Weekly
+  Monthly
+  Yearly
+  Today
+  Month
+  Week
+  Annual
+  Quarter
+  FinancialYear
+}
+
+scalar DateString
+
+scalar DateTime
+
+"""
+##
+ DateTimeField
+#
+"""
+type DateTimeField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+}
+
+"""
+The `DateTimeOffset` scalar type represents a date, time and offset from UTC.
+`DateTimeOffset` expects timestamps to be formatted in accordance with the
+[ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) standard.
+"""
+scalar DateTimeOffset
+
+scalar DateTimeString
+
+scalar Decimal
+
+scalar Email
+
+input ENDataEntityKey {
+  id: ID!
+}
+
+input ENDataPortfolioKey {
+  id: ID!
+  portfolioType: PortfolioType!
+}
+
+type EntityFieldError {
+  fieldName: String!
+  level: LogLevel
+  message: String!
+}
+
+type Estimator {
+  companyId: Int!
+
+  """The Id of the Estimator"""
+  estimatorId: Int!
+
+  """The Global Id of the Estimator"""
+  id: ID!
+  initials: String
+  name: String
+  phone: String
+  portfolioType: PortfolioType
+}
+
+"""A connection from an object to a list of objects of type `Estimator`."""
+type EstimatorConnection {
+  """Information to aid in pagination."""
+  edges: [EstimatorEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [Estimator]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input EstimatorCreateInput {
+  name: String!
+  initials: String = null
+  phone: String = null
+  companyId: Int = null
+  portfolioType: PortfolioType = null
+}
+
+"""
+An edge in a connection from an object to another object of type `Estimator`.
+"""
+type EstimatorEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Estimator
+}
+
+type EstimatorPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: Estimator
+  success: Boolean!
+}
+
+input EstimatorUpdateInput {
+  name: String = null
+  initials: String = null
+  phone: String = null
+}
+
+type FeeAmount {
+  defaultAmount: Decimal
+
+  """The Global Id of the FeeAmount"""
+  id: ID!
+  maxAmount: Decimal
+  supplierId: Int!
+  supplierName: String!
+}
+
+type FeeCategory {
+  claimPortfolioType: PortfolioType
+
+  """The Id of the FeeCategory"""
+  feeCategoryId: Int!
+  feeItems: [FeeItem]
+  feeItemsAggregate: AggregateFeeItem
+  feeTypes: [FeeType]!
+
+  """The Global Id of the FeeCategory"""
+  id: ID!
+  name: String!
+}
+
+input FeeCategoryWhere {
+  claimId: ID!
+  claimPortfolioTypes: [PortfolioType!] = null
+}
+
+type FeeInvoice {
+  actions: [Action]!
+  amount: Decimal
+  document: File
+
+  """The Id of the FeeInvoice"""
+  feeInvoiceId: Int!
+  feeInvoiceStatus: FeeInvoiceStatus
+  feeItemInvoices: [FeeInvoiceItem]
+
+  """The Global Id of the FeeInvoice"""
+  id: ID!
+  number: String!
+}
+
+type FeeInvoiceItem {
+  amount: Decimal!
+
+  """The Id of the FeeInvoiceItem"""
+  feeItemInvoiceId: String!
+  feeItemName: String!
+
+  """The Global Id of the FeeInvoiceItem"""
+  id: ID!
+}
+
+type FeeInvoicePayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: FeeInvoice
+  success: Boolean!
+}
+
+type FeeInvoiceStatus {
+  """The Global Id of the FeeInvoiceStatus"""
+  id: ID!
+
+  """The Id of the FeeInvoiceStatus"""
+  invoiceStatusId: Int!
+  name: String!
+  type: String!
+}
+
+input FeeInvoiceStatusWhere {
+  claimId: ID!
+}
+
+input FeeInvoiceUniqueWhere {
+  feeInvoiceId: Int!
+}
+
+input FeeInvoiceUpdateInput {
+  feeInvoiceStatusId: Int!
+}
+
+input FeeInvoiceUploadInput {
+  invoiceNumber: String!
+  invoiceAmount: Decimal!
+  description: String!
+  private: Boolean = true
+  visibleByInsurer: Boolean = true
+  fileId: String = null
+  fileName: String!
+  fileBase64: String!
+}
+
+input FeeInvoiceUploadWhere {
+  feeItemIds: [Int!]!
+}
+
+type FeeItem {
+  actions: [Action]!
+  authorisedAmount: Decimal
+  claimPortfolioType: PortfolioType
+  description: String
+  feeItemId: Int!
+  feeItemInvoices: [FeeItemInvoice]
+  feeType: FeeType
+
+  """The Global Id of the FeeItem"""
+  id: ID!
+  logDate: DateTimeString
+  maxAmount: Decimal
+  supplier: Company
+  toBeInvoicedAmount: Decimal
+}
+
+input FeeItemCreateInput {
+  claimId: ID!
+  feeTypeId: Int!
+  authorisedAmount: Decimal!
+  supplierId: Int = null
+}
+
+input FeeItemEditInput {
+  authorisedAmount: Decimal!
+}
+
+type FeeItemInvoice {
+  amount: Decimal!
+  feeInvoice: FeeInvoice
+
+  """The Id of the FeeItemInvoice"""
+  feeItemInvoiceId: String!
+
+  """The Global Id of the FeeItemInvoice"""
+  id: ID!
+}
+
+type FeeItemPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: FeeItem
+  success: Boolean!
+}
+
+input FeeItemUniqueWhere {
+  feeItemId: Int!
+}
+
+input FeeItemWhere {
+  claimId: ID!
+  availableToBulkInvoice: Boolean!
+  claimPortfolioTypes: [PortfolioType!] = null
+}
+
+type FeePortfolio {
+  actions: [Action]!
+  feeCategories: [FeeCategory]
+  feeCategoriesAggregate: AggregateFeeCategory
+
+  """The Id of the FeePortfolio"""
+  feePortfolioId: Int!
+
+  """The Global Id of the FeePortfolio"""
+  id: ID!
+}
+
+type FeeTab {
+  """The Global Id of the FeeTab"""
+  id: ID!
+  isDisplay: Boolean!
+}
+
+type FeeType {
+  """The Id of the FeeType"""
+  feeTypeId: Int!
+
+  """The Global Id of the FeeType"""
+  id: ID!
+  name: String!
+  negativeFee: Boolean!
+  suppliers: [Company]
+  suppliersAndAmounts: [FeeAmount]
+}
+
+interface Field {
+  id: ID!
+  label: String
+  order: Int
+  grid: Grid
+}
+
+type FieldInput {
+  isDisabled: Boolean!
+  isDisplay: Boolean!
+  label: String
+  name: String!
+  required: Boolean!
+  value: ID
+}
+
+type File {
+  id: ID!
+  name: String
+  url: String!
+}
+
+"""
+##
+ FileField
+#
+"""
+type FileField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+}
+
+type FilterElement {
+  displayByDefault: Boolean!
+  id: String!
+  name: String!
+  options: [FilterOption]
+  value: String
+}
+
+type FilterInput {
+  icon: String
+
+  """The Global Id of the FilterInput"""
+  id: ID!
+  isDisabled: Boolean!
+  label: String
+  name: String!
+  options: [FilterInputOption]
+  type: FilterType!
+}
+
+type FilterInputOption {
+  group: String
+  id: ID
+  label: String!
+}
+
+type FilterOption {
+  group: String
+  id: ID
+  name: String!
+  value: String!
+}
+
+enum FilterType {
+  Text
+  Date
+  Time
+  DateTime
+  Select
+  Select_multiple
+  ComboBox
+  ComboBox_multiple
+  Search
+}
+
+input FinaliseClaimInput {
+  finaliseReasonId: Int!
+  settlementValue: Float = null
+  noPanelSupplier: String = null
+  dateCompleted: DateString = null
+}
+
+input FollowUpClaimInputType {
+  note: String!
+  lastFollowUpDate: DateTimeString!
+  nextFollowUpDate: DateTimeString = null
+}
+
+type Form {
+  cards: [Card!]
+  id: ID!
+  title: String
+  description: String
+}
+
+type GeneralPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  success: Boolean!
+}
+
+"""Control grid, value from 1 to 12"""
+scalar Grid
+
+"""
+##
+ GroupField
+#
+"""
+type GroupField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+  fields: [Field!]
+}
+
+type HATypeVisit {
+  """The Global Id of the HATypeVisit"""
+  id: ID!
+
+  """The Id of the HATypeVisit"""
+  typeVisitId: Int!
+  visitName: String!
+}
+
+type IncidentDetail {
+  asbestos: Boolean
+  cATCode: CATCode
+  category: ClaimCategory
+  eventType: IncidentEvent
+  habitableProperty: Boolean
+  hold: Boolean!
+  incidentDate: DateString
+  makeSafeRequired: Boolean!
+  riskAddress: Address
+}
+
+input IncidentDetailNewType {
+  eventTypeId: ID!
+  catCodeId: ID!
+  habitableProperty: Boolean = null
+  asbestos: Boolean = null
+  hold: Boolean = null
+  makeSafeRequired: Boolean!
+  incidentDate: DateString!
+  riskAddress: AddressInput!
+  category: ClaimCategory = null
+}
+
+type IncidentEvent {
+  eventName: String!
+  eventTypeId: Int!
+}
+
+"""
+##
+ InfoField
+#
+"""
+type InfoField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  value: String
+}
+
+type InternalAssesor {
+  """The Id of the InternalAssesor"""
+  assesorId: Int!
+  assesorName: String!
+
+  """The Global Id of the InternalAssesor"""
+  id: ID!
+}
+
+"""
+A connection from an object to a list of objects of type `InternalAssesor`.
+"""
+type InternalAssesorConnection {
+  """Information to aid in pagination."""
+  edges: [InternalAssesorEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [InternalAssesor]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `InternalAssesor`.
+"""
+type InternalAssesorEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: InternalAssesor
+}
+
+input JobContentAuthoriseInput {
+  authorisedItems: [Int!]!
+  deliveryChargeUsed: Boolean!
+}
+
+input JobContentItemCreate {
+  costCentreId: Int!
+  costItemId: Int!
+  lineDescription: String!
+  locationId: Int!
+  dimensions: String = null
+  proofOfLoss: String = null
+  directsupply: Boolean = null
+  purchasePrice: String = null
+  ageOfItem: String = null
+  policyLimit: Decimal = null
+  qty: Decimal!
+  rate: Decimal!
+}
+
+input JobContentItemsCreate {
+  jobQuoteId: Int!
+  items: [JobContentItemCreate] = null
+}
+
+input JobContentRemoveAuthorityInput {
+  items: [Int!]!
+}
+
+type JobMakeSafe {
+  approvedDate: DateTimeString
+  completed: Boolean!
+  description: String!
+  gst: Decimal
+
+  """The Global Id of the JobMakeSafe"""
+  id: ID!
+  invoiced: Boolean!
+  lineItems: [JobMakeSafeItem]
+  logdate: DateString!
+
+  """The Id of the JobMakeSafe"""
+  makeSafeId: Int!
+  margin: Decimal
+  portfolioType: PortfolioType
+  quoteStatus: ClaimStatus
+  requestScopePriceAdjust: Boolean!
+  reviewed: Boolean!
+  subtotal: Decimal
+  supplier: Company
+  total: Decimal
+}
+
+"""
+A connection from an object to a list of objects of type `JobMakeSafe`.
+"""
+type JobMakeSafeConnection {
+  """Information to aid in pagination."""
+  edges: [JobMakeSafeEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [JobMakeSafe]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `JobMakeSafe`.
+"""
+type JobMakeSafeEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: JobMakeSafe
+}
+
+input JobMakeSafeIndex {
+  id: [Int] = null
+  claimId: ID = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  portfolios: [PortfolioType] = null
+}
+
+type JobMakeSafeItem {
+  costCentre: QuoteCostCentre
+  costItem: QuoteCostItem
+  dimensions: String
+  gst: Decimal
+
+  """The Global Id of the JobMakeSafeItem"""
+  id: ID!
+  lineDescription: String!
+  location: QuoteCostLocation
+  logdate: DateString!
+  makeSafeId: Int!
+
+  """The Id of the JobMakeSafeItem"""
+  makeSafeItemId: Int!
+  margin: Decimal
+  marginRate: Decimal!
+  qty: Decimal!
+  rate: Decimal
+  subtotal: Decimal
+  total: Decimal
+  unit: QuoteItemUnit
+}
+
+type JobMakeSafeItemPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobMakeSafeItem
+  success: Boolean!
+}
+
+input JobMakeSafeItemsCreate {
+  claimId: ID!
+  portfolioType: PortfolioType!
+  items: [QuoteItemCreate] = null
+}
+
+type JobMakeSafeItemsPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: [JobMakeSafeItem]
+  success: Boolean!
+}
+
+type JobMakeSafePayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobMakeSafe
+  success: Boolean!
+}
+
+type JobProgress {
+  claimJobId: Int!
+  completed: Boolean!
+
+  """The Global Id of the JobProgress"""
+  id: ID!
+
+  """The Id of the JobProgress"""
+  jobProgressId: Int!
+  jobQuoteId: Int
+  logdate: DateTimeString
+  portfolioType: PortfolioType
+  status: ClaimJobStatusInfo
+  statusdate: DateTimeString
+  user: User
+}
+
+"""
+A connection from an object to a list of objects of type `JobProgress`.
+"""
+type JobProgressConnection {
+  """Information to aid in pagination."""
+  edges: [JobProgressEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [JobProgress]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `JobProgress`.
+"""
+type JobProgressEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: JobProgress
+}
+
+type JobProgressPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobProgress
+  success: Boolean!
+}
+
+type JobQuote {
+  approved: Boolean
+  approvedDate: DateTimeString
+  collectExcess: Boolean
+  completed: Boolean!
+  contentsInitialCall: Boolean
+  contentsInitialCallDate: DateTimeString
+  contentsValidationService: Boolean
+  costCentres: [JobQuoteItemCostCentreGroup]
+  deliveryCharges: Decimal
+  deliveryChargeUsed: Boolean!
+  description: String!
+  estimatedTimeForRepairs: String
+  gst: Decimal
+
+  """The Global Id of the JobQuote"""
+  id: ID!
+
+  """The Id of the JobQuote"""
+  jobQuoteId: Int!
+  lineItems: [JobQuoteItem]
+  logdate: DateString!
+  margin: Decimal
+  notAcceptedItems: [JobQuoteItem]
+  originalTotal: Decimal
+  portfolioType: PortfolioType
+  quoteJobStatus: ClaimStatus
+  quoteStatus: ClaimStatus
+  quoteType: QuoteRequestType
+  recommended: Boolean!
+  requestScopePriceAdjust: Boolean
+  reviewed: Boolean!
+  sirGst: Decimal
+  sirMargin: Decimal
+  sirSubtotal: Decimal
+  sirTotal: Decimal
+  startAfterContractReceived: String
+  subtotal: Decimal
+  supplier: Company
+  total: Decimal
+}
+
+input JobQuoteAuthoriseInput {
+  notAcceptedItemIds: [Int] = null
+}
+
+input JobQuoteCompleteInput {
+  startAfterContractReceived: String = null
+  estimatedTimeForRepairs: String = null
+  deliveryCharges: Decimal = null
+  claimRecommendationId: Byte = null
+}
+
+"""A connection from an object to a list of objects of type `JobQuote`."""
+type JobQuoteConnection {
+  """Information to aid in pagination."""
+  edges: [JobQuoteEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [JobQuote]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `JobQuote`.
+"""
+type JobQuoteEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: JobQuote
+}
+
+input JobQuoteIndex {
+  id: [Int] = null
+  claimId: ID = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  portfolios: [PortfolioType] = null
+  requestTypes: [QuoteRequestType] = null
+  requestCategory: RequestCategory = null
+}
+
+type JobQuoteItem {
+  accepted: Boolean!
+  ageOfItem: String
+  authorised: Boolean
+  authorisedDate: DateTimeString
+  authorisedSupplierId: Int
+  costCentre: QuoteCostCentre
+  costItem: QuoteCostItem
+  dimensions: String
+  directsupply: Boolean!
+  gst: Decimal
+
+  """The Global Id of the JobQuoteItem"""
+  id: ID!
+  jobQuoteId: Int!
+
+  """The Id of the JobQuoteItem"""
+  jobQuoteItemId: Int!
+  lineDescription: String!
+  location: QuoteCostLocation
+  logdate: DateString!
+  margin: Decimal
+  marginRate: Decimal!
+  policyLimit: Decimal
+  proofOfLoss: String
+  purchasePrice: String
+  qty: Decimal!
+  rate: Decimal
+  requestedQuote: Boolean!
+  scopeItemId: Int
+  sirGst: Decimal
+  sirMargin: Decimal
+  sirMarginRate: String!
+  sirRate: Decimal
+  sirSubtotal: Decimal
+  sirTotal: Decimal
+  substitutename: String
+  subtotal: Decimal
+  total: Decimal
+  unit: QuoteItemUnit
+}
+
+type JobQuoteItemCostCentreGroup {
+  costCentre: QuoteCostCentre
+
+  """The Id of the JobQuoteItemCostCentreGroup"""
+  firstLineItemId: Int!
+
+  """The Global Id of the JobQuoteItemCostCentreGroup"""
+  id: ID!
+  sirSubtotal: Decimal
+  subtotal: Decimal
+}
+
+type JobQuoteItemPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobQuoteItem
+  success: Boolean!
+}
+
+input JobQuoteItemsCreate {
+  jobQuoteId: Int!
+  portfolioType: PortfolioType!
+  items: [QuoteItemCreate] = null
+}
+
+type JobQuoteItemsPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: [JobQuoteItem]
+  success: Boolean!
+}
+
+input JobQuoteItemUpdate {
+  costCentreId: Int = null
+  costItemId: Int = null
+  locationId: Int = null
+  dimensions: String = null
+  lineDescription: String = null
+  qty: Decimal = null
+  rate: Decimal = null
+  proofOfLoss: String = null
+  directsupply: Boolean = null
+  purchasePrice: String = null
+  ageOfItem: String = null
+  policyLimit: Decimal = null
+  substitutename: String = null
+}
+
+type JobQuotePayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobQuote
+  success: Boolean!
+}
+
+enum JobRecommendationStatus {
+  NotRecommended
+}
+
+type JobSupplier {
+  authorised: Boolean!
+
+  """The Global Id of the JobSupplier"""
+  id: ID!
+
+  """The Id of the JobSupplier"""
+  jobSupplierId: Int!
+  quote: JobQuote
+  quoteSubmitDate: Date
+  requestDate: DateString
+  requestType: String
+  supplier: Company
+}
+
+type JobVariation {
+  approvedDate: DateTimeString
+  completed: Boolean!
+  completedDate: DateTimeString
+  description: String!
+  gst: Decimal
+
+  """The Global Id of the JobVariation"""
+  id: ID!
+  lineItems: [JobVariationItem]
+  logdate: DateString!
+  margin: Decimal
+  notAcceptedItems: [JobVariationItem]
+  portfolioType: PortfolioType
+  quoteId: Int
+  subtotal: Decimal
+  supplier: Company
+  total: Decimal
+  variationDescription: String!
+
+  """The Id of the JobVariation"""
+  variationId: Int!
+  variationReason: JobVariationReason
+  variationStatus: String
+  variationTitle: String!
+}
+
+input JobVariationAuditInput {
+  notAcceptedItemIds: [Int] = null
+  auditToStatus: JobVariationStatus!
+}
+
+"""
+A connection from an object to a list of objects of type `JobVariation`.
+"""
+type JobVariationConnection {
+  """Information to aid in pagination."""
+  edges: [JobVariationEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [JobVariation]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input JobVariationCreate {
+  variationTitle: String!
+  variationDescription: String!
+  variationReasonId: Int!
+  claimJobId: ID!
+  portfolioType: PortfolioType = null
+}
+
+"""
+An edge in a connection from an object to another object of type `JobVariation`.
+"""
+type JobVariationEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: JobVariation
+}
+
+input JobVariationIndex {
+  id: [Int] = null
+  claimId: ID = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  portfolios: [PortfolioType] = null
+}
+
+type JobVariationItem {
+  accepted: Boolean!
+  costCentre: QuoteCostCentre
+  costItem: QuoteCostItem
+  dimensions: String
+  gst: Decimal
+
+  """The Global Id of the JobVariationItem"""
+  id: ID!
+  lineDescription: String!
+  location: QuoteCostLocation
+  logdate: DateString!
+  margin: Decimal
+  marginRate: Decimal!
+  qty: Decimal!
+  rate: Decimal
+  subtotal: Decimal
+  total: Decimal
+  unit: QuoteItemUnit
+  variationId: Int!
+
+  """The Id of the JobVariationItem"""
+  variationItemId: Int!
+}
+
+type JobVariationItemPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobVariationItem
+  success: Boolean!
+}
+
+input JobVariationItemsCreate {
+  variationId: Int!
+  portfolioType: PortfolioType!
+  items: [QuoteItemCreate] = null
+}
+
+type JobVariationItemsPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: [JobVariationItem]
+  success: Boolean!
+}
+
+type JobVariationPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobVariation
+  success: Boolean!
+}
+
+type JobVariationReason {
+  reasonDescription: String!
+  variationReasonId: Byte
+}
+
+enum JobVariationStatus {
+  Pending
+  Approved
+  Rejected
+  Reset
+}
+
+type JobWorkOrder {
+  approvedDate: DateTimeString
+  costCentres: [JobWorkOrderItemCostCentreGroup]
+  description: String!
+  gst: Decimal
+
+  """The Global Id of the JobWorkOrder"""
+  id: ID!
+
+  """The Id of the JobWorkOrder"""
+  jobWorkOrderId: Int!
+  lineItems: [JobWorkOrderItem]
+  logdate: DateString!
+  margin: Decimal
+  portfolioType: PortfolioType
+  quoteStatus: ClaimStatus
+  subtotal: Decimal
+  supplier: Company
+  total: Decimal
+}
+
+"""
+A connection from an object to a list of objects of type `JobWorkOrder`.
+"""
+type JobWorkOrderConnection {
+  """Information to aid in pagination."""
+  edges: [JobWorkOrderEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [JobWorkOrder]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input JobWorkOrderDateInput {
+  startDate: DateString = null
+  completeDate: DateString = null
+}
+
+"""
+An edge in a connection from an object to another object of type `JobWorkOrder`.
+"""
+type JobWorkOrderEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: JobWorkOrder
+}
+
+input JobWorkOrderIndex {
+  id: [Int] = null
+  claimId: ID = null
+  createDateFrom: Date = null
+  createDateTo: Date = null
+  portfolios: [PortfolioType] = null
+}
+
+type JobWorkOrderItem {
+  completeDate: DateString
+  costCentre: QuoteCostCentre
+  costItem: QuoteCostItem
+  dimensions: String
+  gst: Decimal
+
+  """The Global Id of the JobWorkOrderItem"""
+  id: ID!
+  jobWorkOrderId: Int!
+
+  """The Id of the JobWorkOrderItem"""
+  jobWorkOrderItemId: Int!
+  lineDescription: String!
+  location: QuoteCostLocation
+  logdate: DateString!
+  margin: Decimal
+  marginRate: Decimal!
+  qty: Decimal!
+  rate: Decimal
+  startDate: DateString
+  subtotal: Decimal
+  total: Decimal
+  unit: QuoteItemUnit
+}
+
+type JobWorkOrderItemCostCentreGroup {
+  completeDate: DateString
+  costCentre: QuoteCostCentre
+
+  """The Id of the JobWorkOrderItemCostCentreGroup"""
+  firstLineItemId: Int!
+
+  """The Global Id of the JobWorkOrderItemCostCentreGroup"""
+  id: ID!
+  startDate: DateString
+  subtotal: Decimal
+}
+
+type JobWorkOrderItemCostCentreGroupPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: JobWorkOrderItemCostCentreGroup
+  success: Boolean!
+}
+
+input JobWorkProgressInput {
+  claimJobId: ID!
+  statusDate: Date = null
+  portfolioType: PortfolioType!
+}
+
+scalar Json
+
+enum LogLevel {
+  Trace
+  Debug
+  Information
+  Warning
+  Error
+  Critical
+  None
+}
+
+type LossAdjusterReportType {
+  reportTypeId: Byte
+  reportTypeName: String!
+}
+
+input MakeInitialCallInput {
+  note: String = null
+}
+
+input MediaUpdateDataInput {
+  name: String
+}
+
+input MediaUpdateWhereInput {
+  mediaId: ID!
+}
+
+input MessageConfigsInput {
+  initSessionMessage: String!
+  checkRequirementsMessage: String!
+  checkRequirementsFailedMessage: String!
+  signallingMessage: String!
+  signallingFailedMessage: String!
+  connectedMessage: String!
+  endedMessage: String!
+}
+
+"""
+The `Milliseconds` scalar type represents a period of time represented as the total number of milliseconds.
+"""
+scalar Milliseconds
+
+type Mutation {
+  adjusterInitialCall(
+    """make initial call form"""
+    input: MakeInitialCallInput = null
+
+    """the claim key statement"""
+    where: ClaimUniqueWhere!
+  ): ClaimJobPayload
+  adjusterMakeAppointment(
+    """make appointment form"""
+    input: AppointmentInput!
+
+    """the claim key statement"""
+    where: ClaimUniqueWhere!
+  ): ClaimJobPayload
+  claimAcceptRequest(
+    """the job request key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimAddPortfolio(
+    """the add claim portfolio input"""
+    input: AddPortfolioInput!
+
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimPortfolioPayload
+  claimAwaitingInfo(
+    """claim awaiting information form"""
+    input: AwaitingInfoClaimInputType!
+
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimCancelAwaitingInfo(
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimCaseSettleCreate(
+    """the claim key statement"""
+    input: ClaimCashSettleInput!
+  ): GeneralPayload
+  claimCommunicationAcknoledge(
+    """communication key"""
+    where: ENDataPortfolioKey!
+  ): ClaimCommunicationPayload
+  claimDeclineRequest(
+    """the job request key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimFinalise(
+    """claim finalise form"""
+    input: FinaliseClaimInput!
+
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimFollowUp(
+    """claim follow up form"""
+    input: FollowUpClaimInputType!
+
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): GeneralPayload
+  claimInitialCall(
+    """make initial call form"""
+    input: MakeInitialCallInput = null
+
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimPortfolioPayload
+  claimMakeAppointment(
+    """make appointment form"""
+    input: AppointmentInput!
+
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimPortfolioPayload
+  claimMakeSafeAppointment(
+    """make appointment form"""
+    input: AppointmentInput!
+
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimMakeSafeComplete(
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimMakeSafeInitialCall(
+    """make initial call form"""
+    input: MakeInitialCallInput = null
+
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimReallocateScopingSupplier(
+    """the reallocate supplier form"""
+    input: ReallocateScopingSupplierInput!
+
+    """the job request key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimRequestCostedScope(
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimRequestQuotes(
+    """the job request key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  claimReserveUpdate(
+    """Claim reserve update input"""
+    input: ClaimReserveInput!
+
+    """Fee invoice key"""
+    where: ClaimUniqueWhere!
+  ): GeneralPayload
+  claimResetFinalise(
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): ClaimPortfolioPayload
+  createClaimCommunication(
+    """claim communication create input"""
+    input: ClaimCommunicationCreate!
+  ): ClaimCommunicationPayload
+  createClaimDocument(
+    """claim document form"""
+    input: ClaimDocumentCreate!
+  ): ClaimDocumentPayload
+  createClaimJob(
+    """the claim job create form"""
+    input: ClaimJobCreate!
+  ): ClaimJobPayload
+  createClaimLossAdjusterDocument(
+    """Claim loss adjuster document form"""
+    input: ClaimLossAdjusterDocumentCreate!
+  ): ClaimLossAdjusterDocumentPayload
+  createClaimNote(
+    """claim note form"""
+    input: ClaimNoteCreate!
+  ): ClaimNotePayload
+  createJobContentItems(
+    """new job contents items"""
+    input: JobContentItemsCreate!
+  ): JobQuoteItemsPayload
+  createJobMakeSafeItems(
+    """new make safe items"""
+    input: JobMakeSafeItemsCreate!
+  ): JobMakeSafeItemsPayload
+  createJobQuoteItems(
+    """new job quote items"""
+    input: JobQuoteItemsCreate!
+  ): JobQuoteItemsPayload
+  createJobVariation(
+    """new job variation"""
+    input: JobVariationCreate!
+  ): JobVariationPayload
+  createJobVariationItems(
+    """new job variation items"""
+    input: JobVariationItemsCreate!
+  ): JobVariationItemsPayload
+  createJobWorkProgress(
+    """new job variation items"""
+    input: JobWorkProgressInput!
+  ): JobProgressPayload
+  csvProduceForJobQuote(
+    """job quote index"""
+    where: JobQuoteIndex!
+  ): GeneralPayload
+  deleteClaimDocument(
+    """claim document key"""
+    input: ENDataPortfolioKey!
+  ): GeneralPayload
+  deleteClaimLossAdjusterDocument: GeneralPayload
+  deleteJobMakeSafeItem(
+    """job make safe item key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  deleteJobQuoteItem(
+    """job quote item key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  deleteJobVariationItem(
+    """job variation item key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  estimatorCreate(
+    """new estimator object"""
+    input: EstimatorCreateInput!
+  ): EstimatorPayload
+  estimatorUpdate(
+    """Estimator update input"""
+    input: EstimatorUpdateInput!
+
+    """Estimator key"""
+    where: ENDataPortfolioKey!
+  ): EstimatorPayload
+  feeInvoiceDelete(
+    """Fee invoice key"""
+    where: FeeInvoiceUniqueWhere!
+  ): FeeInvoicePayload
+  feeInvoiceUpdate(
+    """Fee invoice update input"""
+    input: FeeInvoiceUpdateInput!
+
+    """Fee invoice key"""
+    where: FeeInvoiceUniqueWhere!
+  ): FeeInvoicePayload
+  feeInvoiceUpload(
+    """Fee invoice create input"""
+    input: FeeInvoiceUploadInput!
+
+    """Fee item key"""
+    where: FeeInvoiceUploadWhere!
+  ): FeeInvoicePayload
+  feeItemCreate(
+    """Fee item create input"""
+    input: FeeItemCreateInput!
+  ): FeeItemPayload
+  feeItemDelete(
+    """Fee item key"""
+    where: FeeItemUniqueWhere!
+  ): FeeItemPayload
+  feeItemEdit(
+    """Fee item update input"""
+    input: FeeItemEditInput!
+
+    """Fee item key"""
+    where: FeeItemUniqueWhere!
+  ): FeeItemPayload
+  jobContentAuthorise(
+    """claim key"""
+    where: ENDataEntityKey!
+
+    """job content authorise input"""
+    input: JobContentAuthoriseInput!
+  ): JobQuotePayload
+  jobContentComplete(
+    """job contents key"""
+    where: ENDataEntityKey!
+  ): JobQuotePayload
+  jobContentInitialCall(
+    """make initial call form"""
+    input: MakeInitialCallInput = null
+
+    """the content quote key statement"""
+    where: ENDataEntityKey!
+  ): JobQuoteItemPayload
+  jobContentRemoveAuthority(
+    """claim key"""
+    where: ENDataEntityKey!
+
+    """job content authorise input"""
+    input: JobContentRemoveAuthorityInput!
+  ): JobQuotePayload
+  jobMakeSafeQuoteComplete(
+    """job make safe key"""
+    where: ENDataPortfolioKey!
+  ): JobMakeSafePayload
+  jobMakeSafeQuoteReset(
+    """job make safe key"""
+    where: ENDataPortfolioKey!
+  ): JobMakeSafePayload
+  jobQuoteAuthorise(
+    """job quote key"""
+    where: ENDataPortfolioKey!
+
+    """job quote key"""
+    input: JobQuoteAuthoriseInput = null
+  ): JobQuotePayload
+  jobQuoteComplete(
+    """job quote complete form"""
+    input: JobQuoteCompleteInput = null
+
+    """job quote key"""
+    where: ENDataPortfolioKey!
+  ): JobQuotePayload
+  jobQuoteRecommend(
+    """job quote key"""
+    where: ENDataPortfolioKey!
+  ): JobQuotePayload
+  jobQuoteReset(
+    """job quote key"""
+    where: ENDataPortfolioKey!
+  ): JobQuotePayload
+  jobQuoteReview(
+    """job quote key"""
+    where: ENDataPortfolioKey!
+  ): JobQuotePayload
+  jobVariationAudit(
+    """job variation audit input"""
+    input: JobVariationAuditInput!
+
+    """job variation key"""
+    where: ENDataPortfolioKey!
+  ): JobVariationPayload
+  jobVariationComplete(
+    """job variation key"""
+    where: ENDataPortfolioKey!
+  ): JobVariationPayload
+  pdfProduceForAdjusterDocuments(
+    """Loss adjuster documents index"""
+    where: ClaimItemFilter!
+  ): GeneralPayload
+  pdfProduceForClaimDocuments(
+    """Claim documents index"""
+    where: ClaimItemFilter!
+  ): GeneralPayload
+  pdfProduceForJobQuote(
+    """job quote key"""
+    where: JobQuoteIndex!
+  ): GeneralPayload
+  pdfProduceForMakeSafe(
+    """job make safe key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  pdfProduceForSiteReport(
+    """claim job key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  pdfProduceForVariation(
+    """claim job key"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  specialistRequestCreate(
+    """Specialist Request create input"""
+    input: SpecialistRequestCreateInput!
+  ): SpecialistRequestPayload
+  specialistRequestDelete(
+    """Specialist Request key"""
+    where: SpecialistRequestUniqueWhere!
+  ): SpecialistRequestPayload
+  specialistRequestEdit(
+    """Specialist Request key"""
+    where: SpecialistRequestUniqueWhere!
+
+    """Specialist Request input"""
+    input: SpecialistRequestEditInput!
+  ): SpecialistRequestPayload
+  supervisorCreate(
+    """new supervisor object"""
+    input: SupervisorCreateInput!
+  ): SupervisorPayload
+  supervisorUpdate(
+    """Supervisor update input"""
+    input: SupervisorUpdateInput!
+
+    """Supervisor key"""
+    where: ENDataPortfolioKey!
+  ): SupervisorPayload
+  updateClaimJob(
+    """the claim job update form"""
+    input: ClaimJobInput!
+
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimJobPayload
+  updateJobContentItem(
+    """new job quote items"""
+    input: JobQuoteItemUpdate!
+
+    """job quote item key"""
+    where: ENDataEntityKey!
+  ): JobQuoteItemPayload
+  updateJobMakeSafeItem(
+    """new job quote items"""
+    input: QuoteItemUpdate!
+
+    """job quote item key"""
+    where: ENDataPortfolioKey!
+  ): JobMakeSafeItemPayload
+  updateJobQuoteItem(
+    """new job quote items"""
+    input: QuoteItemUpdate!
+
+    """job quote item key"""
+    where: ENDataPortfolioKey!
+  ): JobQuoteItemPayload
+  updateJobVariationItem(
+    """new job quote items"""
+    input: QuoteItemUpdate!
+
+    """job quote item key"""
+    where: ENDataPortfolioKey!
+  ): JobVariationItemPayload
+  updateJobWorkDate(
+    """job work date input"""
+    input: JobWorkOrderDateInput!
+
+    """job variation key"""
+    where: ENDataPortfolioKey!
+  ): JobWorkOrderItemCostCentreGroupPayload
+  updateSiteReport(
+    """the claim site report form"""
+    input: SiteReportInput!
+
+    """the claim key statement"""
+    where: ENDataPortfolioKey!
+  ): GeneralPayload
+  userAuthenticateAllServer(
+    """user credential to authentication"""
+    input: UserCredential!
+  ): [UserValidation]
+  userLogout: GeneralPayload
+  userRenewToken: UserValidation
+  userServiceToken(
+    """Service"""
+    input: ServiceInput!
+  ): ServiceValidation
+  claimReportUpsert(claimId: ID!, data: Json): Report!
+  claimReportSubmit(claimId: ID!): Report!
+  claimReportReset(claimId: ID!): Report!
+  accountCreate(data: AccountCreateDataInput!): AccountCreatePayload
+  accountUpdate(where: AccountUniqueWhereInput!, data: AccountUpdateDataInput!): Account
+  roomCreate(data: RoomCreateDataInput): Room
+  roomJoin(where: RoomJoinWhereInput, data: RoomJoinDataInput): RoomJoinPayload
+  callSessionStatusUpdate(where: CallSessionStatusUpdateWhereInput, data: CallSessionStatusUpdateDataInput): CallSession
+  photoUpload(sessionId: ID!, file: Upload!): Room
+  updateRoom(where: RoomUpdateWhereInput!, data: RoomUpdateDataInput!): Room
+  mediaUpdate(where: MediaUpdateWhereInput!, data: MediaUpdateDataInput!): File
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+}
+
+type PaymentMethod {
+  """The Global Id of the PaymentMethod"""
+  id: ID!
+  name: String!
+
+  """The Id of the PaymentMethod"""
+  paymentMethodId: Int!
+}
+
+input PaymentMethodWhere {
+  claimId: ID!
+}
+
+type PaymentType {
+  """The Global Id of the PaymentType"""
+  id: ID!
+  name: String!
+
+  """The Id of the PaymentType"""
+  paymentTypeId: Int!
+}
+
+input PaymentTypeWhere {
+  claimId: ID!
+  claimPortfolioType: PortfolioType!
+}
+
+scalar PersonName
+
+scalar Phone
+
+type PolicyCover {
+  policyCoverId: Short
+  policyCoverName: String!
+}
+
+type PolicyType {
+  policyTypeId: Short
+  policyTypeName: String!
+}
+
+type PortfolioAction {
+  building: ActionControl
+  contents: ActionControl
+  restoration: ActionControl
+}
+
+enum PortfolioType {
+  Building
+  Contents
+  Restoration
+}
+
+type PrivilegeAction {
+  nodeName: String!
+  privilegeCode: String!
+}
+
+type PrivilegeMenu {
+  nodeName: String!
+  pages: [PrivilegePage]
+  privilegeCode: String!
+}
+
+type PrivilegePage {
+  actions: [PrivilegeAction]
+  nodeName: String!
+  privilegeCode: String!
+}
+
+type Query {
+  claimCommuications(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: CommunicationFilter = null
+  ): ClaimCommunicationConnection
+  claimDocuments(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: ClaimItemFilter = null
+  ): ClaimDocumentConnection
+  claimFilterOptions(
+    """filter apply to this query"""
+    where: ClaimJobFilter = null
+  ): [FilterOption]
+  claimFilters: [FilterElement]
+  claimJob(
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): ClaimJob
+  claimJobs(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: ClaimJobFilter = null
+  ): ClaimJobConnection
+  claimLossAdjusterDocuments(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: ClaimItemFilter = null
+  ): ClaimLossAdjusterDocumentConnection
+  claimNextStep(
+    """the claim key statement"""
+    where: ENDataEntityKey!
+  ): [ClaimJobStatusInfo]
+  claimNotes(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: ClaimItemFilter = null
+  ): ClaimNoteConnection
+  claimParticipants(
+    """filter apply to this query"""
+    where: ClaimParticipantIndex = null
+  ): [Company]
+  communicationFilters: [FilterElement]
+  company(
+    """the company key statement"""
+    where: ENDataPortfolioKey!
+  ): CompanyProfile
+  currentUser: AuthenticatedUser
+  dashboardFilters: [FilterElement]
+  dashboards: [Dashboard]
+  dashboardWidgets(
+    """filter apply to this query"""
+    where: DashboardWidgetIndex!
+  ): [WidgetGraphType]
+  estimators(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: SupplierManagerIndex = null
+  ): EstimatorConnection
+  feeCategories(
+    """filter apply to this query"""
+    where: FeeCategoryWhere!
+  ): [FeeCategory]
+  feeInvoice(
+    """filter apply to this query"""
+    where: FeeInvoiceUniqueWhere!
+  ): FeeInvoice
+  feeInvoiceStatus(
+    """filter apply to this query"""
+    where: FeeInvoiceStatusWhere!
+  ): [FeeInvoiceStatus]
+  feeItem(
+    """filter apply to this query"""
+    where: FeeItemUniqueWhere!
+  ): FeeItem
+  feeItems(
+    """filter apply to this query"""
+    where: FeeItemWhere!
+  ): [FeeItem]
+  feePortfolios(
+    """filter apply to this query"""
+    where: ClaimPortfoliosWhere!
+  ): [FeePortfolio]
+  internalAssessors(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: SupplierManagerIndex = null
+  ): InternalAssesorConnection
+  jobMakeSafes(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: JobMakeSafeIndex!
+  ): JobMakeSafeConnection
+  jobQuotes(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: JobQuoteIndex!
+  ): JobQuoteConnection
+  jobVariationReasons: [JobVariationReason]
+  jobVariations(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: JobVariationIndex!
+  ): JobVariationConnection
+  jobWorkOrders(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: JobWorkOrderIndex!
+  ): JobWorkOrderConnection
+  jobWorkProgresses(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: ENDataPortfolioKey!
+  ): JobProgressConnection
+  me: User
+  paymentMethods(
+    """filter apply to this query"""
+    where: PaymentMethodWhere!
+  ): [PaymentMethod]
+  paymentTypes(
+    """filter apply to this query"""
+    where: PaymentTypeWhere!
+  ): [PaymentType]
+  quoteCostCentres(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: QuoteCostCentreIndex!
+  ): QuoteCostCentreConnection
+  quoteCostItems(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: QuoteCostItemIndex!
+  ): QuoteCostItemConnection
+  quoteCostLocations(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: QuoteCostLocationIndex!
+  ): QuoteCostLocationConnection
+  reportingClaimJobGeneral(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: CaseReportIndex = null
+  ): ClaimJobGeneralReportConnection
+  specialistCategories(
+    """filter apply to this query"""
+    where: SpecialistCategoryWhere!
+  ): [SpecialistCategory]
+  specialistRequests(
+    """filter apply to this query"""
+    where: SpecialistRequestWhere!
+  ): [SpecialistRequest]
+  specialists(
+    """filter apply to this query"""
+    where: SpecialistWhere!
+  ): [Company]
+  supervisors(
+    """
+    Only look at connected edges with cursors greater than the value of `after`.
+    """
+    after: String = null
+
+    """
+    Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.
+    """
+    first: Int = null
+
+    """filter apply to this query"""
+    where: SupplierManagerIndex = null
+  ): SupervisorConnection
+
+  """forms: [Form!]"""
+  _form(id: ID!): Form
+  _report(claimId: ID!): Report
+  account: Account
+  callSessions(where: CallSessionWhereInput): [CallSession!]!
+  callSession(id: ID!): CallSession
+}
+
+type QuoteCostCentre {
+  """The Id of the QuoteCostCentre"""
+  costCentreId: Int!
+  costCentreName: String!
+  costType: QuoteCostType
+  directSupplier: Boolean!
+
+  """The Global Id of the QuoteCostCentre"""
+  id: ID!
+}
+
+"""
+A connection from an object to a list of objects of type `QuoteCostCentre`.
+"""
+type QuoteCostCentreConnection {
+  """Information to aid in pagination."""
+  edges: [QuoteCostCentreEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [QuoteCostCentre]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `QuoteCostCentre`.
+"""
+type QuoteCostCentreEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: QuoteCostCentre
+}
+
+input QuoteCostCentreIndex {
+  insurerId: Int = null
+  costType: QuoteCostType = null
+  portfolioType: PortfolioType!
+}
+
+type QuoteCostItem {
+  """The Id of the QuoteCostItem"""
+  costItemId: Int!
+
+  """The Global Id of the QuoteCostItem"""
+  id: ID!
+  itemDescription: String!
+  units: [QuoteItemUnit]
+}
+
+"""
+A connection from an object to a list of objects of type `QuoteCostItem`.
+"""
+type QuoteCostItemConnection {
+  """Information to aid in pagination."""
+  edges: [QuoteCostItemEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [QuoteCostItem]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `QuoteCostItem`.
+"""
+type QuoteCostItemEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: QuoteCostItem
+}
+
+input QuoteCostItemIndex {
+  costCentreId: Int!
+  portfolioType: PortfolioType!
+}
+
+type QuoteCostLocation {
+  """The Id of the QuoteCostLocation"""
+  costLocationId: Int!
+
+  """The Global Id of the QuoteCostLocation"""
+  id: ID!
+  locationName: String!
+}
+
+"""
+A connection from an object to a list of objects of type `QuoteCostLocation`.
+"""
+type QuoteCostLocationConnection {
+  """Information to aid in pagination."""
+  edges: [QuoteCostLocationEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [QuoteCostLocation]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+"""
+An edge in a connection from an object to another object of type `QuoteCostLocation`.
+"""
+type QuoteCostLocationEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: QuoteCostLocation
+}
+
+input QuoteCostLocationIndex {
+  portfolioType: PortfolioType!
+}
+
+enum QuoteCostType {
+  UnDefined
+  Labour
+  Material
+}
+
+input QuoteItemCreate {
+  costCentreId: Int!
+  costItemId: Int!
+  lineDescription: String!
+  locationId: Int!
+  dimensions: String = null
+  qty: Decimal!
+  unitId: Int!
+  rate: Decimal!
+  marginRate: Decimal!
+  gst: Decimal = null
+}
+
+type QuoteItemUnit {
+  defaultValue: Decimal!
+  unitId: Int!
+  unitName: String!
+}
+
+input QuoteItemUpdate {
+  costCentreId: Int = null
+  costItemId: Int = null
+  locationId: Int = null
+  dimensions: String = null
+  lineDescription: String = null
+  unitId: Int = null
+  qty: Decimal = null
+  rate: Decimal = null
+  marginRate: Decimal = null
+  gst: Decimal = null
+}
+
+enum QuoteRequestStatus {
+  NewClaims
+  OfferScopeAcc
+  InitialCallMade
+  AppointmentMade
+  AwaitingInfo
+  AwaitingInfoContents
+  ClaimFinalised
+  JobAuthorised
+  JobLost
+  AdditionalItems
+  WaitingScope
+  WaitingQuotes
+  QuoteSubmitted
+  WaitingResult
+}
+
+enum QuoteRequestType {
+  UnDefined
+  Scoping
+  DesktopQuoting
+}
+
+input ReallocateScopingSupplierInput {
+  supplierId: Int!
+  availableForQuoting: Boolean!
+  note: String = null
+}
+
+type Report {
+  id: ID!
+  data: Json
+  status: ReportStatus!
+}
+
+enum ReportStatus {
+  REPORTING
+  REPORTED
+}
+
+enum RequestCategory {
+  All
+  Scoping
+  DesktopQuoting
+  Authorised
+  Lost
+}
+
+type Room {
+  id: ID!
+  account: Account!
+  case: Case
+  status: RoomStatus
+  callSessions: [CallSession!]!
+  photos: [File!]
+  videos: [File!]
+  createdAt: DateTime!
+}
+
+input RoomCreateDataInput {
+  endataCaseId: String
+  referenceNumber: String!
+  name: String
+  address: String
+  phone: String
+  email: String
+}
+
+input RoomJoinDataInput {
+  accountId: ID
+  sdpOffer: String
+  clientIceCandidates: [String!]!
+}
+
+type RoomJoinPayload {
+  sdpAnswer: String
+  serverIceCandidates: [String!]!
+  callSession: CallSession
+}
+
+input RoomJoinWhereInput {
+  roomId: ID
+  callSessionId: ID
+}
+
+enum RoomStatus {
+  IN_CALL
+  ON_HOLD
+  ENDED
+}
+
+input RoomUpdateDataInput {
+  referenceNumber: String
+  name: String
+  address: String
+}
+
+input RoomUpdateWhereInput {
+  roomId: ID!
+}
+
+input RoomWhereInput {
+  keyword: String
+}
+
+"""
+The `Seconds` scalar type represents a period of time represented as the total number of seconds.
+"""
+scalar Seconds
+
+"""
+##
+ SelectField
+#
+"""
+type SelectField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+  options: [SelectFieldOption!]
+}
+
+type SelectFieldOption {
+  id: ID!
+  label: String!
+  value: String!
+}
+
+enum Server {
+  ALL
+  ENDATA
+  IAG
+  ALZ
+  RAC
+  RACT
+  QBE
+  AIG
+  WBC
+  RACQ
+  TESTUAT_1
+  TESTUAT_2
+  TSETPVT
+}
+
+input ServiceInput {
+  serviceId: Int!
+}
+
+type ServiceValidation {
+  server: Server
+  serviceToken: String!
+}
+
+scalar Short
+
+type SiteCladdingType {
+  """The Id of the SiteCladdingType"""
+  claddingTypeId: Int!
+  claddingTypeName: String!
+
+  """The Global Id of the SiteCladdingType"""
+  id: ID!
+}
+
+type SiteDwellingAge {
+  """The Id of the SiteDwellingAge"""
+  dwellingAgeId: Int!
+  dwellingAgeName: String!
+
+  """The Global Id of the SiteDwellingAge"""
+  id: ID!
+}
+
+type SiteDwellingType {
+  """The Id of the SiteDwellingType"""
+  dwellingTypeId: Int!
+  dwellingTypeName: String!
+
+  """The Global Id of the SiteDwellingType"""
+  id: ID!
+}
+
+type SiteFoundationType {
+  """The Id of the SiteFoundationType"""
+  foundationTypeId: Int!
+  foundationTypeName: String!
+
+  """The Global Id of the SiteFoundationType"""
+  id: ID!
+}
+
+type SiteHouseType {
+  """The Id of the SiteHouseType"""
+  houseTypeId: Int!
+  houseTypeName: String!
+
+  """The Global Id of the SiteHouseType"""
+  id: ID!
+}
+
+type SiteIsAClaim {
+  """The Global Id of the SiteIsAClaim"""
+  id: ID!
+
+  """The Id of the SiteIsAClaim"""
+  isAClaimId: Int!
+  isAClaimName: String!
+}
+
+input SiteReportInput {
+  claddingTypeId: Int = null
+  dwellingAgeId: Int = null
+  dwellingTypeId: Int = null
+  foundationTypeId: Int = null
+  houseTypeId: Int = null
+  isAClaimId: Int = null
+  roofTypeId: Int = null
+  suppervisorId: Int = null
+  estimatorId: Int = null
+  claimrecommendationId: Int = null
+  reportDate: DateString = null
+  emergencyMakeSafeWorks: Int = null
+  sumInsuredAdequate: Int = null
+  siteReportDescription: String = null
+}
+
+type SiteRoofType {
+  """The Global Id of the SiteRoofType"""
+  id: ID!
+
+  """The Id of the SiteRoofType"""
+  roofTypeId: Int!
+  roofTypeName: String!
+}
+
+type SpecialistCategory {
+  """The Global Id of the SpecialistCategory"""
+  id: ID!
+  name: String!
+
+  """The Id of the SpecialistCategory"""
+  specialistCategoryId: Int!
+}
+
+input SpecialistCategoryWhere {
+  claimId: ID!
+  specialistId: Int = null
+}
+
+type SpecialistRequest {
+  actions: [Action]!
+
+  """The Global Id of the SpecialistRequest"""
+  id: ID!
+  requestedDate: DateString
+  specialist: Company
+  specialistCategory: SpecialistCategory
+
+  """The Id of the SpecialistRequest"""
+  specialistRequestId: Int!
+}
+
+input SpecialistRequestCreateInput {
+  claimId: ID!
+  specialistCategoryId: Int!
+  specialistId: Int!
+}
+
+input SpecialistRequestEditInput {
+  specialistCategoryId: Int!
+}
+
+type SpecialistRequestPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: SpecialistRequest
+  success: Boolean!
+}
+
+input SpecialistRequestUniqueWhere {
+  specialistRequestId: Int!
+}
+
+input SpecialistRequestWhere {
+  claimId: ID!
+}
+
+input SpecialistWhere {
+  claimId: ID!
+  specialistCategoryId: Int!
+}
+
+enum State {
+  QLD
+  NSW
+  VIC
+  WA
+  ACT
+  SA
+  TAS
+  NT
+}
+
+type Subscription {
+  callSession(where: CallSessionSubscriptionWhereInput): CallSession
+}
+
+type Supervisor {
+  companyId: Int!
+
+  """The Global Id of the Supervisor"""
+  id: ID!
+  initials: String
+  name: String
+  phone: String
+  portfolioType: PortfolioType
+
+  """The Id of the Supervisor"""
+  suppervisorId: Int!
+}
+
+"""A connection from an object to a list of objects of type `Supervisor`."""
+type SupervisorConnection {
+  """Information to aid in pagination."""
+  edges: [SupervisorEdge]
+
+  """
+  A list of all of the objects returned in the connection. This is a convenience
+  field provided for quickly exploring the API; rather than querying for "{
+  edges { node } }" when no edge data is needed, this field can be used instead.
+  Note that when clients like Relay need to fetch the "cursor" field on the edge
+  to enable efficient pagination, this shortcut cannot be used, and the full "{
+  edges { node } } " version should be used instead.
+  """
+  items: [Supervisor]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  A count of the total number of objects in this connection, ignoring
+  pagination. This allows a client to fetch the first five objects by passing
+  "5" as the argument to `first`, then fetch the total count so it could display
+  "5 of 83", for example. In cases where we employ infinite scrolling or don't
+  have an exact count of entries, this field will return `null`.
+  """
+  totalCount: Int
+}
+
+input SupervisorCreateInput {
+  name: String!
+  initials: String = null
+  phone: String = null
+  companyId: Int = null
+  portfolioType: PortfolioType = null
+}
+
+"""
+An edge in a connection from an object to another object of type `Supervisor`.
+"""
+type SupervisorEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Supervisor
+}
+
+type SupervisorPayload {
+  fieldErrors: [EntityFieldError]
+  messages: [String!]!
+  result: Supervisor
+  success: Boolean!
+}
+
+input SupervisorUpdateInput {
+  name: String = null
+  initials: String = null
+  phone: String = null
+}
+
+input SupplierManagerIndex {
+  companyId: Int = null
+  portfolioType: PortfolioType = null
+}
+
+enum SupplierStatusFilter {
+  RequestedAndAvailable
+  RequestedOnly
+  AcceptedOnly
+}
+
+enum SupplierTypeFilter {
+  ManagerAndSupplier
+  Supplier
+  SupplierExcludeScoping
+}
+
+"""
+##
+ SwitchField
+#
+"""
+type SwitchField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+}
+
+"""TextAreaField"""
+type TextAreaField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+  rows: Int
+  rowsMax: Int
+}
+
+"""
+##
+ TextField
+#
+"""
+type TextField implements Field {
+  id: ID!
+  order: Int
+  grid: Grid
+  label: String
+  name: String
+}
+
+scalar Upload
+
+type User {
+  company: CompanyProfile
+  disabled: Boolean!
+  hasMultipleAccess: Boolean!
+  permitedCompanyIDs: [Int!]!
+  preference: UserPreference
+  privileges: UserPrivileges
+  userEmail: String
+  userId: Int!
+  userName: String!
+  userPhone: String
+  userRole: AccessRole
+}
+
+input UserCredential {
+  userLogin: String!
+  password: String!
+}
+
+type UserPreference {
+  applicationFont: String!
+  applicationLanguage: String!
+  applicationTheme: String!
+  applicationTimeZone: Byte
+}
+
+type UserPrivileges {
+  menus: [PrivilegeMenu]
+}
+
+enum UserType {
+  Administrator
+  Builder
+  Restorer
+  ContentSupplier
+}
+
+type UserValidation {
+  accessToken: String!
+  refreshToken: String!
+  server: Server
+  token: String!
+  user: User
+}
+
+type WidgetData {
+  dataSetName: String!
+  internalFilterName: String
+  legend: String
+  valueDisplay: DataDisplay
+  valueGroup: Byte
+  values: [Float]
+  valueSense: DataSense
+  valueUnit: DataUnit
+}
+
+type WidgetGraphType {
+  data: [WidgetData]
+  description: String
+  extended: Boolean!
+
+  """The Global Id of the node"""
+  id: ID!
+  labels: [String!]!
+  title: String!
+  viewName: WidgetViewName
+
+  """The Id of the node"""
+  widgetId: Int!
+  width: Byte
+}
+
+enum WidgetViewName {
+  UnDefined
+  DataSingle
+  DataDouble
+  ChartJs
+  KPIGear
+  ListData
+  ListCheck
+  Messages
+  JobTasks
+}
+
